@@ -7,7 +7,6 @@ COPY internal ./internal
 COPY pkg ./pkg
 RUN go build -o bin/core ./cmd/core/main.go
 
-FROM alpine:latest as core
+FROM alpine:latest as app
 WORKDIR / app
-COPY --from=build /go/src/github.com/VATUSA/google-workspace-integration/bin/core ./
-CMD ["./core"]
+COPY --from=build /go/src/github.com/VATUSA/google-workspace-integration/bin/* ./

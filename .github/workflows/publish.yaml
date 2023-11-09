@@ -1,0 +1,77 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+# GitHub recommends pinning actions to a commit SHA.
+# To get a newer version, you will need to update the SHA.
+# You can also reference a tag or branch, but the action may change without warning.
+
+name: Publish Docker image
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  push_to_registry:
+    name: Push Docker image to Docker Hub
+    runs-on: ubuntu-latest
+
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@9ec57ed1fcdbf14dcef7dfbe97b2010124a938b7
+        with:
+          images: vatusa/google-workspace-integration
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@3b5e8027fcad23fda98b2e3ac259d8d67585f671
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          target: app
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Update kustomization Version
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: 'newTag: ".*"'
+          replace: 'newTag: "${{ github.ref_name }}"'
+          include: "manifest/kustomization.yaml"
+          regex: true
+
+      - name: Debug kustomization
+        run: |
+          cat manifest/kustomization.yaml
+
+      # Commit all changed files back to the repository
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        id: auto_commit
+        with:
+          branch: main
+
+      - name: Update Tags
+        run: |
+          git config user.name "GitHub Actions Bot"
+          git config user.email "<>"
+          git tag -f release ${{ steps.auto_commit.outputs.commit_hash }}
+          git tag -f ${{ github.ref_name }} ${{ steps.auto_commit.outputs.commit_hash }}
+          git push origin release -f
+          git push origin ${{ github.ref_name }} -f

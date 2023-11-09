@@ -1,0 +1,6 @@
+resources:
+  - core-deployment.yaml
+
+images:
+  - name: vatusa/kustomization.yaml
+    newTag: "0.0.1"
