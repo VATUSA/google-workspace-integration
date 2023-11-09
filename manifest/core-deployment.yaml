@@ -23,5 +23,5 @@ spec:
           command: ["/app/core"]
           envFrom:
             - secretRef:
-                name: discord-bot
+                name: google-workspace-integration
       restartPolicy: Always
