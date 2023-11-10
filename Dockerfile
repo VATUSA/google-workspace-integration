@@ -1,4 +1,4 @@
-FROM golang:1.21.1-alpine3.16 as build
+FROM golang:1.21.1-alpine3.18 as build
 WORKDIR /go/src/github.com/VATUSA/google-workspace-integration
 COPY go.mod ./
 COPY go.sum ./
