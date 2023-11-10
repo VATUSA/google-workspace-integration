@@ -4,7 +4,6 @@ COPY go.mod ./
 COPY go.sum ./
 COPY cmd ./cmd
 COPY internal ./internal
-COPY pkg ./pkg
 RUN go build -o bin/core ./cmd/core/main.go
 
 FROM alpine:latest as app
