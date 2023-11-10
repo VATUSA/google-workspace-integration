@@ -3,4 +3,4 @@ resources:
 
 images:
   - name: vatusa/kustomization.yaml
-    newTag: "0.0.8"
+    newTag: "0.0.9"
