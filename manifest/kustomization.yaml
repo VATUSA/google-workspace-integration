@@ -2,5 +2,5 @@ resources:
   - core-deployment.yaml
 
 images:
-  - name: vatusa/kustomization.yaml
+  - name: vatusa/google-workspace-integration
     newTag: "0.0.9"
