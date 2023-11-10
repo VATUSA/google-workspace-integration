@@ -3,6 +3,7 @@ package integration
 import (
 	"fmt"
 	"github.com/VATUSA/google-workspace-integration/internal/api"
+	"github.com/VATUSA/google-workspace-integration/internal/config"
 	"github.com/VATUSA/google-workspace-integration/internal/workspace_helper"
 	admin "google.golang.org/api/admin/directory/v1"
 	"slices"
@@ -91,7 +92,7 @@ func CreateFacilityGroups() error {
 	if err != nil {
 		return err
 	}
-	groups, err := svc.Groups.List().Customer("C038380rr").Do()
+	groups, err := svc.Groups.List().Customer(config.GOOGLE_CUSTOMER_ID).Do()
 	if err != nil {
 		return err
 	}

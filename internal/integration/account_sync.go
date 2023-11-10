@@ -2,6 +2,7 @@ package integration
 
 import (
 	"fmt"
+	"github.com/VATUSA/google-workspace-integration/internal/config"
 	"github.com/VATUSA/google-workspace-integration/internal/workspace_helper"
 )
 
@@ -10,7 +11,7 @@ func SyncAccounts() error {
 	if err != nil {
 		return err
 	}
-	users, err := svc.Users.List().Customer("C038380rr").Do()
+	users, err := svc.Users.List().Customer(config.GOOGLE_CUSTOMER_ID).Do()
 	var existingUserEmails []string
 
 	for _, user := range users.Users {
