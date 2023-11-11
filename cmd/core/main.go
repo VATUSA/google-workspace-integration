@@ -17,6 +17,7 @@ func main() {
 	}
 	for {
 		println("Starting process loop")
+
 		err = integration.CreateFacilityGroups()
 		if err != nil {
 			println(err.Error())
@@ -28,6 +29,13 @@ func main() {
 			println(err.Error())
 			return
 		}
+
+		err = integration.SyncAccounts()
+		if err != nil {
+			println(err.Error())
+			return
+		}
+
 		println("End of process loop -- Sleep")
 		time.Sleep(5 * time.Minute)
 	}
