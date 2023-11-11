@@ -7,23 +7,27 @@ import (
 
 type Account struct {
 	*gorm.Model
-	CID                uint `gorm:"column:cid"`
-	Alias              string
-	PrimaryEmail       string
-	IsActive           bool
-	IsCreated          bool
-	IsDeleted          bool
-	IsExceptionAccount bool
+	CID                 uint   `gorm:"column:cid"`
+	Alias               string `gorm:"size:80"`
+	PrimaryEmail        string `gorm:"size:120"`
+	IsActive            bool
+	IsCreated           bool
+	IsDeleted           bool
+	IsExceptionAccount  bool
+	ShouldResetPassword bool
+	TemporaryPassword   string `gorm:"size:16"`
 }
 
 func NewAccount(cid uint, alias string) Account {
 	return Account{
-		CID:          cid,
-		Alias:        alias,
-		PrimaryEmail: fmt.Sprintf("%s@vatusa.net", alias),
-		IsActive:     true,
-		IsCreated:    false,
-		IsDeleted:    false,
+		CID:                 cid,
+		Alias:               alias,
+		PrimaryEmail:        fmt.Sprintf("%s@vatusa.net", alias),
+		IsActive:            true,
+		IsCreated:           false,
+		IsDeleted:           false,
+		ShouldResetPassword: false,
+		TemporaryPassword:   "",
 	}
 }
 

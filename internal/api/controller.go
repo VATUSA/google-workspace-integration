@@ -3,11 +3,16 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 )
 
 type StaffListDataWrapper struct {
 	Data []ControllerData `json:"data"`
+}
+
+type ControllerDataWrapper struct {
+	Data ControllerData `json:"data"`
 }
 
 type ControllerData struct {
@@ -30,6 +35,29 @@ type ControllerRoleData struct {
 
 type ControllerVisitingFacilityData struct {
 	Facility string `json:"facility"`
+}
+
+func GetControllerData(cid uint) (*ControllerData, error) {
+	response, err := Get(fmt.Sprintf("/user/%d", cid))
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode == 404 {
+		return nil, nil
+	}
+	if response.StatusCode != 200 {
+		return nil, errors.New("HTTP Error when fetching controller data")
+	}
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	var wrapper ControllerDataWrapper
+	err = json.Unmarshal(responseData, &wrapper)
+	if err != nil {
+		return nil, err
+	}
+	return &wrapper.Data, nil
 }
 
 func GetStaffMembers() ([]ControllerData, error) {

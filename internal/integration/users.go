@@ -24,19 +24,26 @@ func ProcessControllers(data []api.ControllerData) error {
 		return err
 	}
 
-	accountsByCid := make(map[uint]*database.Account)
+	accountsByCid := make(map[uint]database.Account)
 	var existingAliases []string
 
 	for _, account := range accounts {
-		accountsByCid[account.CID] = &account
+		accountsByCid[account.CID] = account
 		existingAliases = append(existingAliases, strings.ToLower(account.Alias))
 	}
 
 	for _, c := range data {
-		account := accountsByCid[c.CID]
-		err := ProcessController(c, account, existingAliases)
-		if err != nil {
-			return err
+		account, ok := accountsByCid[c.CID]
+		if ok {
+			err := ProcessController(c, &account, existingAliases)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := ProcessController(c, nil, existingAliases)
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
@@ -71,10 +78,10 @@ func shouldControllerHaveAccount(data api.ControllerData) bool {
 	if !data.FlagHomeController {
 		return false
 	}
-	if data.Rating == 8 || data.Rating == 10 {
-		return true
-	}
-	allowedRoles := []string{"ATM", "DATM", "TA", "EC", "FE", "WM", "INS", "MTR", "DICE", "USWT"}
+	//if data.Rating == 8 || data.Rating == 10 {
+	//	return true
+	//}
+	allowedRoles := []string{ /*"ATM", "DATM", "TA", "EC", "FE", "WM", "INS", "MTR",*/ "DICE", "USWT"}
 	for _, role := range data.Roles {
 		if slices.Contains(allowedRoles, role.Role) {
 			return true

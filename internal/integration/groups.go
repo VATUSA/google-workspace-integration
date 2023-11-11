@@ -34,49 +34,114 @@ func GroupInfoForFacility(facility string) []GroupInfo {
 	return out
 }
 
-func GetGroupsForController(controller *api.ControllerData) []string {
-	var out []string
+type MembershipType = string
+
+var (
+	GROUP_ROLE_MEMBER  MembershipType = "MEMBER"
+	GROUP_ROLE_MANAGER MembershipType = "MANAGER"
+	GROUP_ROLE_OWNER   MembershipType = "OWNER"
+	facilities                        = []string{
+		"ZAB", "ZAN", "ZTL", "ZBW", "ZAU", "ZOB", "ZDV", "ZFW", "HCF", "ZHU", "ZID",
+		"ZJX", "ZKC", "ZLA", "ZME", "ZMA", "ZMP", "ZNY", "ZOA", "ZLC", "ZSE", "ZDC"}
+)
+
+func groupEmail(facility string, groupType string) string {
+	if groupType == "" {
+		return fmt.Sprintf("%s@vatusa.net", strings.ToLower(facility))
+	}
+	return fmt.Sprintf("%s-%s@vatusa.net", strings.ToLower(facility), groupType)
+}
+
+func setGroupMembership(out map[string]MembershipType, email string, membership MembershipType) {
+	if membership == GROUP_ROLE_MEMBER {
+		if out[email] != GROUP_ROLE_MANAGER {
+			out[email] = membership
+		}
+	} else {
+		out[email] = membership
+	}
+}
+
+func GetControllerGroups(controller *api.ControllerData) map[string]MembershipType {
+	out := make(map[string]MembershipType)
 
 	if controller.Rating == 8 || controller.Rating == 10 {
-		out = append(out, fmt.Sprintf("%s-instructors@vatusa.net", controller.Facility))
-		out = append(out, fmt.Sprintf("%s-training@vatusa.net", controller.Facility))
+		if slices.Contains(facilities, controller.Facility) {
+			setGroupMembership(out, groupEmail(controller.Facility, "instructors"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "training"), GROUP_ROLE_MEMBER)
+		}
+		setGroupMembership(out, groupEmail("instructor", "all"), GROUP_ROLE_MEMBER)
 	}
 
 	for _, role := range controller.Roles {
 		if role.Role == "ATM" {
-			out = append(out, fmt.Sprintf("%s@vatusa.net", role.Facility))
-			out = append(out, fmt.Sprintf("%s-staff@vatusa.net", role.Facility))
-			out = append(out, fmt.Sprintf("%s-sstf@vatusa.net", role.Facility))
-			out = append(out, "atm-all@vatusa.net")
-
+			setGroupMembership(out, groupEmail(controller.Facility, "sstf"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MANAGER)
+			setGroupMembership(out, groupEmail(controller.Facility, ""), GROUP_ROLE_MANAGER)
+			setGroupMembership(out, groupEmail("atm", "all"), GROUP_ROLE_MEMBER)
 		} else if role.Role == "DATM" {
-			out = append(out, fmt.Sprintf("%s@vatusa.net", role.Facility))
-			out = append(out, fmt.Sprintf("%s-staff@vatusa.net", role.Facility))
-			out = append(out, fmt.Sprintf("%s-sstf@vatusa.net", role.Facility))
-			out = append(out, "datm-all@vatusa.net")
+			setGroupMembership(out, groupEmail(controller.Facility, "sstf"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MANAGER)
+			setGroupMembership(out, groupEmail(controller.Facility, ""), GROUP_ROLE_MANAGER)
+			setGroupMembership(out, groupEmail("datm", "all"), GROUP_ROLE_MEMBER)
 		} else if role.Role == "TA" {
-			out = append(out, fmt.Sprintf("%s@vatusa.net", role.Facility))
-			out = append(out, fmt.Sprintf("%s-staff@vatusa.net", role.Facility))
-			out = append(out, fmt.Sprintf("%s-sstf@vatusa.net", role.Facility))
-			out = append(out, fmt.Sprintf("%s-instructors@vatusa.net", role.Facility))
-			out = append(out, fmt.Sprintf("%s-training@vatusa.net", role.Facility))
-			out = append(out, "ta-all@vatusa.net")
+			setGroupMembership(out, groupEmail(controller.Facility, "sstf"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MANAGER)
+			setGroupMembership(out, groupEmail(controller.Facility, ""), GROUP_ROLE_MANAGER)
+			setGroupMembership(out, groupEmail("ta", "all"), GROUP_ROLE_MEMBER)
 		} else if role.Role == "EC" {
-			out = append(out, fmt.Sprintf("%s-staff@vatusa.net", role.Facility))
-			out = append(out, "ec-all@vatusa.net")
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail("ec", "all"), GROUP_ROLE_MEMBER)
 		} else if role.Role == "FE" {
-			out = append(out, fmt.Sprintf("%s-staff@vatusa.net", role.Facility))
-			out = append(out, "fe-all@vatusa.net")
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail("fe", "all"), GROUP_ROLE_MEMBER)
 		} else if role.Role == "WM" {
-			out = append(out, fmt.Sprintf("%s-staff@vatusa.net", role.Facility))
-			out = append(out, "wm-all@vatusa.net")
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail("wm", "all"), GROUP_ROLE_MEMBER)
 		} else if role.Role == "INS" {
-			out = append(out, fmt.Sprintf("%s-instructors@vatusa.net", role.Facility))
-			out = append(out, fmt.Sprintf("%s-training@vatusa.net", role.Facility))
-			out = append(out, "instructor-all@vatusa.net")
+			setGroupMembership(out, groupEmail(controller.Facility, "instructors"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "training"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail("instructor", "all"), GROUP_ROLE_MEMBER)
 		} else if role.Role == "MTR" {
-			out = append(out, fmt.Sprintf("%s-training@vatusa.net", role.Facility))
-			out = append(out, "mentor-all@vatusa.net")
+			setGroupMembership(out, groupEmail(controller.Facility, "training"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail("mentor", "all"), GROUP_ROLE_MEMBER)
+		} else if role.Role == "DICE" {
+			setGroupMembership(out, groupEmail("dice", ""), GROUP_ROLE_MEMBER)
+		}
+	}
+
+	return out
+}
+
+func AllManagedGroupEmails() []string {
+	var out []string
+
+	for _, gi := range AllManagedGroups() {
+		out = append(out, gi.Email)
+	}
+
+	return out
+}
+
+func AllManagedGroups() []GroupInfo {
+	var out []GroupInfo
+
+	out = append(out, GroupInfo{
+		Name:  "DICE-Team",
+		Email: "dice@vatusa.net",
+	})
+
+	roles := []string{"atm", "datm", "ta", "ec", "fe", "wm", "instructor", "mentor"}
+	for _, role := range roles {
+		out = append(out, GroupInfo{
+			Name:  fmt.Sprintf("AlL-%s", strings.ToUpper(role)),
+			Email: fmt.Sprintf("%s-all@vatusa.net", role),
+		})
+	}
+
+	for _, facility := range facilities {
+		for _, gi := range GroupInfoForFacility(facility) {
+			out = append(out, gi)
 		}
 	}
 
@@ -84,10 +149,6 @@ func GetGroupsForController(controller *api.ControllerData) []string {
 }
 
 func CreateFacilityGroups() error {
-
-	facilities := []string{"ZAB", "ZAN", "ZTL", "ZBW", "ZAU", "ZOB", "ZDV", "ZFW", "HCF", "ZHU", "ZID", "ZJX", "ZKC",
-		"ZLA", "ZME", "ZMA", "ZMP", "ZNY", "ZOA", "ZLC", "ZSE", "ZDC"}
-
 	svc, err := workspace_helper.GetService()
 	if err != nil {
 		return err

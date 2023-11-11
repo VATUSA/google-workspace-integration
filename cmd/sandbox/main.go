@@ -25,4 +25,10 @@ func main() {
 		println(err.Error())
 		return
 	}
+
+	err = integration.SyncAccounts()
+	if err != nil {
+		println(err.Error())
+		return
+	}
 }
