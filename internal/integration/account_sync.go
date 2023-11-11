@@ -60,7 +60,7 @@ func SyncAccounts() error {
 			password := generatePassword()
 			println(fmt.Sprintf("Creating user %s - Password: %s", account.PrimaryEmail, password))
 			// TODO: Create Account
-			user := admin.User{
+			newUser := admin.User{
 				Aliases:                    nil,
 				Archived:                   false,
 				ChangePasswordAtNextLogin:  true,
@@ -83,10 +83,11 @@ func SyncAccounts() error {
 				Suspended:        false,
 				SuspensionReason: "",
 			}
-			_, err := svc.Users.Insert(&user).Do()
+			createdUser, err := svc.Users.Insert(&newUser).Do()
 			if err != nil {
 				return err
 			}
+			user = createdUser
 			account.IsCreated = true
 			account.TemporaryPassword = password
 		} else {
