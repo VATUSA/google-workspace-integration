@@ -7,12 +7,13 @@ import (
 
 type Account struct {
 	*gorm.Model
-	CID          uint `gorm:"column:cid"`
-	Alias        string
-	PrimaryEmail string
-	IsActive     bool
-	IsCreated    bool
-	IsDeleted    bool
+	CID                uint `gorm:"column:cid"`
+	Alias              string
+	PrimaryEmail       string
+	IsActive           bool
+	IsCreated          bool
+	IsDeleted          bool
+	IsExceptionAccount bool
 }
 
 func NewAccount(cid uint, alias string) Account {

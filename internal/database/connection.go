@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+import _ "github.com/joho/godotenv/autoload"
+
 var DB *gorm.DB
 
 func DSN(c *DatabaseConfig) (string, error) {

@@ -14,11 +14,11 @@ func main() {
 	if err != nil {
 		return
 	}
-	//err = integration.CreateFacilityGroups()
-	//if err != nil {
-	//	println(err.Error())
-	//	return
-	//}
+	err = integration.CreateFacilityGroups()
+	if err != nil {
+		println(err.Error())
+		return
+	}
 
 	err = integration.DoProcessStaff()
 	if err != nil {
