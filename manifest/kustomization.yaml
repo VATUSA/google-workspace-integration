@@ -3,4 +3,4 @@ resources:
 
 images:
   - name: vatusa/google-workspace-integration
-    newTag: "0.0.13"
+    newTag: "0.0.14"
