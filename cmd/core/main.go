@@ -36,6 +36,12 @@ func main() {
 			return
 		}
 
+		err = integration.ProcessPasswordEmails()
+		if err != nil {
+			println(err.Error())
+			return
+		}
+
 		println("End of process loop -- Sleep")
 		time.Sleep(5 * time.Minute)
 	}
