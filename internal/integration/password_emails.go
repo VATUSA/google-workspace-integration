@@ -29,6 +29,12 @@ func ProcessPasswordEmails() error {
 			if err != nil {
 				return err
 			}
+
+			account.TemporaryPassword = ""
+			err = account.Save()
+			if err != nil {
+				return err
+			}
 		}
 	}
 	return nil
