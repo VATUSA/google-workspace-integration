@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/VATUSA/google-workspace-integration/internal/config"
 	"io/ioutil"
 )
 
@@ -38,7 +39,7 @@ type ControllerVisitingFacilityData struct {
 }
 
 func GetControllerData(cid uint) (*ControllerData, error) {
-	response, err := Get(fmt.Sprintf("/user/%d", cid))
+	response, err := Get(fmt.Sprintf("/user/%d?apikey=%s", cid, config.VATUSA_API2_KEY))
 	if err != nil {
 		return nil, err
 	}

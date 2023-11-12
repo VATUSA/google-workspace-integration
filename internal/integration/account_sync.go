@@ -99,6 +99,10 @@ func SyncAccounts() error {
 			}
 		}
 		if user.OrgUnitPath != "/Managed" {
+			err = account.Save()
+			if err != nil {
+				return err
+			}
 			continue
 		}
 		if account.ShouldResetPassword {
