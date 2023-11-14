@@ -24,10 +24,12 @@ func generatePassword() string {
 }
 
 var (
-	ManagedGroupEmails, _ = AllManagedGroupEmails()
+	ManagedGroupEmails []string
 )
 
 func SyncAccounts() error {
+	var err error
+	ManagedGroupEmails, err = AllManagedGroupEmails()
 	svc, err := workspace_helper.GetService()
 	if err != nil {
 		return err
