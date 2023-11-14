@@ -24,7 +24,7 @@ func generatePassword() string {
 }
 
 var (
-	ManagedGroupEmails = AllManagedGroupEmails()
+	ManagedGroupEmails, _ = AllManagedGroupEmails()
 )
 
 func SyncAccounts() error {
@@ -98,7 +98,7 @@ func SyncAccounts() error {
 				hasChange = true
 			}
 		}
-		if user.OrgUnitPath != "/Managed" {
+		if strings.HasPrefix(user.OrgUnitPath, "/Managed") {
 			err = account.Save()
 			if err != nil {
 				return err
@@ -106,14 +106,16 @@ func SyncAccounts() error {
 			continue
 		}
 		if account.ShouldResetPassword {
+			hasChange = true
 			password := generatePassword()
 			user.Password = fmt.Sprintf("%x", md5.Sum([]byte(password)))
 			user.HashFunction = "MD5"
+			user.ChangePasswordAtNextLogin = true
 			account.ShouldResetPassword = false
 			account.TemporaryPassword = password
 			fmt.Printf("Reset password for user %s - Password: %s\n", user.PrimaryEmail, password)
 		}
-		if hasChange && user != nil && user.OrgUnitPath == "/Managed" {
+		if hasChange && user != nil {
 			_, err := svc.Users.Update(user.PrimaryEmail, user).Do()
 			if err != nil {
 				return err

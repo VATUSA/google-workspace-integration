@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/VATUSA/google-workspace-integration/internal/api"
 	"github.com/VATUSA/google-workspace-integration/internal/config"
+	"github.com/VATUSA/google-workspace-integration/internal/database"
 	"github.com/VATUSA/google-workspace-integration/internal/workspace_helper"
 	admin "google.golang.org/api/admin/directory/v1"
 	"slices"
@@ -11,36 +12,53 @@ import (
 )
 
 type GroupInfo struct {
-	Name  string
-	Email string
+	Name    string
+	Email   string
+	Aliases []string
 }
 
-func makeGroupInfo(facility string, nameFmt string, emailFmt string) GroupInfo {
+func makeGroupInfo(facility string, nameFmt string, addressPart string, domains []database.Domain) GroupInfo {
+	var aliases []string
+	var email string
+	if addressPart != "" {
+		email = fmt.Sprintf("%s-%s@vatusa.net", strings.ToLower(facility), addressPart)
+	} else {
+		email = fmt.Sprintf("%s@vatusa.net", strings.ToLower(facility))
+	}
+	for _, domain := range domains {
+		aliases = append(aliases, fmt.Sprintf("%s@%s", addressPart, strings.ToLower(domain.Domain)))
+	}
 	return GroupInfo{
-		Name:  fmt.Sprintf(nameFmt, facility),
-		Email: fmt.Sprintf(emailFmt, strings.ToLower(facility)),
+		Name:    fmt.Sprintf(nameFmt, facility),
+		Email:   email,
+		Aliases: aliases,
 	}
 }
 
-func GroupInfoForFacility(facility string) []GroupInfo {
+func GroupInfoForFacility(facility string) ([]GroupInfo, error) {
 	var out []GroupInfo
 
-	out = append(out, makeGroupInfo(facility, "%s ARTCC", "%s@vatusa.net"))
-	out = append(out, makeGroupInfo(facility, "%s Senior Staff", "%s-sstf@vatusa.net"))
-	out = append(out, makeGroupInfo(facility, "%s Staff", "%s-staff@vatusa.net"))
-	out = append(out, makeGroupInfo(facility, "%s Instructors", "%s-instructors@vatusa.net"))
-	out = append(out, makeGroupInfo(facility, "%s Training Staff", "%s-training@vatusa.net"))
+	domains, err := database.FetchDomainsByFacility(facility)
+	if err != nil {
+		return nil, err
+	}
 
-	return out
+	out = append(out, makeGroupInfo(facility, "%s ARTCC", "", domains))
+	out = append(out, makeGroupInfo(facility, "%s Senior Staff", "sstf", domains))
+	out = append(out, makeGroupInfo(facility, "%s Staff", "staff", domains))
+	out = append(out, makeGroupInfo(facility, "%s Instructors", "instructors", domains))
+	out = append(out, makeGroupInfo(facility, "%s Training Staff", "training", domains))
+
+	return out, nil
 }
 
 type MembershipType = string
 
 var (
-	GROUP_ROLE_MEMBER  MembershipType = "MEMBER"
-	GROUP_ROLE_MANAGER MembershipType = "MANAGER"
-	GROUP_ROLE_OWNER   MembershipType = "OWNER"
-	facilities                        = []string{
+	GroupRoleMember  MembershipType = "MEMBER"
+	GroupRoleManager MembershipType = "MANAGER"
+	GroupRoleOwner   MembershipType = "OWNER"
+	facilities                      = []string{
 		"ZAB", "ZAN", "ZTL", "ZBW", "ZAU", "ZOB", "ZDV", "ZFW", "HCF", "ZHU", "ZID",
 		"ZJX", "ZKC", "ZLA", "ZME", "ZMA", "ZMP", "ZNY", "ZOA", "ZLC", "ZSE", "ZDC"}
 )
@@ -53,8 +71,8 @@ func groupEmail(facility string, groupType string) string {
 }
 
 func setGroupMembership(out map[string]MembershipType, email string, membership MembershipType) {
-	if membership == GROUP_ROLE_MEMBER {
-		if out[email] != GROUP_ROLE_MANAGER {
+	if membership == GroupRoleMember {
+		if out[email] != GroupRoleManager {
 			out[email] = membership
 		}
 	} else {
@@ -67,63 +85,68 @@ func GetControllerGroups(controller *api.ControllerData) map[string]MembershipTy
 
 	if controller.Rating == 8 || controller.Rating == 10 {
 		if slices.Contains(facilities, controller.Facility) {
-			setGroupMembership(out, groupEmail(controller.Facility, "instructors"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail(controller.Facility, "training"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "instructors"), GroupRoleMember)
+			setGroupMembership(out, groupEmail(controller.Facility, "training"), GroupRoleMember)
 		}
-		setGroupMembership(out, groupEmail("instructor", "all"), GROUP_ROLE_MEMBER)
+		setGroupMembership(out, groupEmail("instructor", "all"), GroupRoleMember)
 	}
 
 	for _, role := range controller.Roles {
 		if role.Role == "ATM" {
-			setGroupMembership(out, groupEmail(controller.Facility, "sstf"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MANAGER)
-			setGroupMembership(out, groupEmail(controller.Facility, ""), GROUP_ROLE_MANAGER)
-			setGroupMembership(out, groupEmail("atm", "all"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "sstf"), GroupRoleMember)
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GroupRoleManager)
+			setGroupMembership(out, groupEmail(controller.Facility, ""), GroupRoleManager)
+			setGroupMembership(out, groupEmail("atm", "all"), GroupRoleMember)
 		} else if role.Role == "DATM" {
-			setGroupMembership(out, groupEmail(controller.Facility, "sstf"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MANAGER)
-			setGroupMembership(out, groupEmail(controller.Facility, ""), GROUP_ROLE_MANAGER)
-			setGroupMembership(out, groupEmail("datm", "all"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "sstf"), GroupRoleMember)
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GroupRoleManager)
+			setGroupMembership(out, groupEmail(controller.Facility, ""), GroupRoleManager)
+			setGroupMembership(out, groupEmail("datm", "all"), GroupRoleMember)
 		} else if role.Role == "TA" {
-			setGroupMembership(out, groupEmail(controller.Facility, "sstf"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MANAGER)
-			setGroupMembership(out, groupEmail(controller.Facility, ""), GROUP_ROLE_MANAGER)
-			setGroupMembership(out, groupEmail("ta", "all"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "sstf"), GroupRoleMember)
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GroupRoleManager)
+			setGroupMembership(out, groupEmail(controller.Facility, ""), GroupRoleManager)
+			setGroupMembership(out, groupEmail("ta", "all"), GroupRoleMember)
 		} else if role.Role == "EC" {
-			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail("ec", "all"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GroupRoleMember)
+			setGroupMembership(out, groupEmail("ec", "all"), GroupRoleMember)
 		} else if role.Role == "FE" {
-			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail("fe", "all"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GroupRoleMember)
+			setGroupMembership(out, groupEmail("fe", "all"), GroupRoleMember)
 		} else if role.Role == "WM" {
-			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail("wm", "all"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "staff"), GroupRoleMember)
+			setGroupMembership(out, groupEmail("wm", "all"), GroupRoleMember)
 		} else if role.Role == "INS" {
-			setGroupMembership(out, groupEmail(controller.Facility, "instructors"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail(controller.Facility, "training"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail("instructor", "all"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "instructors"), GroupRoleMember)
+			setGroupMembership(out, groupEmail(controller.Facility, "training"), GroupRoleMember)
+			setGroupMembership(out, groupEmail("instructor", "all"), GroupRoleMember)
 		} else if role.Role == "MTR" {
-			setGroupMembership(out, groupEmail(controller.Facility, "training"), GROUP_ROLE_MEMBER)
-			setGroupMembership(out, groupEmail("mentor", "all"), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail(controller.Facility, "training"), GroupRoleMember)
+			setGroupMembership(out, groupEmail("mentor", "all"), GroupRoleMember)
 		} else if role.Role == "DICE" {
-			setGroupMembership(out, groupEmail("dice", ""), GROUP_ROLE_MEMBER)
+			setGroupMembership(out, groupEmail("dice", ""), GroupRoleMember)
 		}
 	}
 
 	return out
 }
 
-func AllManagedGroupEmails() []string {
+func AllManagedGroupEmails() ([]string, error) {
 	var out []string
 
-	for _, gi := range AllManagedGroups() {
+	allGroups, err := AllManagedGroups()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, gi := range allGroups {
 		out = append(out, gi.Email)
 	}
 
-	return out
+	return out, nil
 }
 
-func AllManagedGroups() []GroupInfo {
+func AllManagedGroups() ([]GroupInfo, error) {
 	var out []GroupInfo
 
 	out = append(out, GroupInfo{
@@ -140,12 +163,16 @@ func AllManagedGroups() []GroupInfo {
 	}
 
 	for _, facility := range facilities {
-		for _, gi := range GroupInfoForFacility(facility) {
+		facilityGroups, err := GroupInfoForFacility(facility)
+		if err != nil {
+			return nil, err
+		}
+		for _, gi := range facilityGroups {
 			out = append(out, gi)
 		}
 	}
 
-	return out
+	return out, nil
 }
 
 func CreateFacilityGroups() error {
@@ -163,7 +190,11 @@ func CreateFacilityGroups() error {
 	}
 
 	for _, facility := range facilities {
-		for _, gi := range GroupInfoForFacility(facility) {
+		facilityGroups, err := GroupInfoForFacility(facility)
+		if err != nil {
+			return err
+		}
+		for _, gi := range facilityGroups {
 			err := createGroup(svc, existingGroups, gi)
 			if err != nil {
 				return err
@@ -174,22 +205,37 @@ func CreateFacilityGroups() error {
 }
 
 func createGroup(svc *admin.Service, existingGroups []string, info GroupInfo) error {
-	if slices.Contains(existingGroups, info.Email) {
+	if !slices.Contains(existingGroups, info.Email) {
 		// Don't try to create a group that already exists
-		return nil
+
+		group := admin.Group{
+			AdminCreated: true,
+			Description:  "",
+			Email:        info.Email,
+			Name:         info.Name,
+		}
+		println(fmt.Sprintf("Creating group %s", info.Email))
+		_, err := svc.Groups.Insert(&group).Do()
+		if err != nil {
+			return err
+		}
 	}
-	group := admin.Group{
-		AdminCreated: true,
-		Aliases:      nil,
-		Description:  "",
-		Email:        info.Email,
-		Kind:         "admin#directory#group",
-		Name:         info.Name,
-	}
-	println(fmt.Sprintf("Creating group %s", info.Email))
-	_, err := svc.Groups.Insert(&group).Do()
+	group, err := svc.Groups.Get(info.Email).Do()
 	if err != nil {
 		return err
+	}
+	for _, alias := range info.Aliases {
+		if !slices.Contains(group.Aliases, alias) {
+			println(fmt.Sprintf("Adding alias %s to group %s", alias, info.Email))
+			alias := admin.Alias{
+				Alias:        alias,
+				PrimaryEmail: info.Email,
+			}
+			_, err := svc.Groups.Aliases.Insert(info.Email, &alias).Do()
+			if err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
