@@ -100,7 +100,7 @@ func SyncAccounts() error {
 				hasChange = true
 			}
 		}
-		if strings.HasPrefix(user.OrgUnitPath, "/Managed") {
+		if !strings.HasPrefix(user.OrgUnitPath, "/Managed") {
 			err = account.Save()
 			if err != nil {
 				return err
