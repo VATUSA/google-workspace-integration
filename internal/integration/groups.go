@@ -19,18 +19,12 @@ type GroupInfo struct {
 
 func makeGroupInfo(facility string, nameFmt string, addressPart string, domains []database.Domain) GroupInfo {
 	var aliases []string
-	var email string
-	if addressPart != "" {
-		email = fmt.Sprintf("%s-%s@vatusa.net", strings.ToLower(facility), addressPart)
-	} else {
-		email = fmt.Sprintf("%s@vatusa.net", strings.ToLower(facility))
-	}
 	for _, domain := range domains {
 		aliases = append(aliases, fmt.Sprintf("%s@%s", addressPart, strings.ToLower(domain.Domain)))
 	}
 	return GroupInfo{
 		Name:    fmt.Sprintf(nameFmt, facility),
-		Email:   email,
+		Email:   groupEmail(facility, addressPart),
 		Aliases: aliases,
 	}
 }
@@ -48,6 +42,9 @@ func GroupInfoForFacility(facility string) ([]GroupInfo, error) {
 	out = append(out, makeGroupInfo(facility, "%s Staff", "staff", domains))
 	out = append(out, makeGroupInfo(facility, "%s Instructors", "instructors", domains))
 	out = append(out, makeGroupInfo(facility, "%s Training Staff", "training", domains))
+	out = append(out, makeGroupInfo(facility, "%s Events", "events", domains))
+	out = append(out, makeGroupInfo(facility, "%s Facilities", "facilities", domains))
+	out = append(out, makeGroupInfo(facility, "%s Web", "web", domains))
 
 	return out, nil
 }
