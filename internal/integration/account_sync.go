@@ -34,13 +34,27 @@ func SyncAccounts() error {
 	if err != nil {
 		return err
 	}
-	users, err := svc.Users.List().Customer(config.GOOGLE_CUSTOMER_ID).Do()
 	var existingUserEmails []string
 	usersByEmail := make(map[string]*admin.User)
+	nextPageToken := ""
+	for {
+		call := svc.Users.List().Customer(config.GOOGLE_CUSTOMER_ID)
+		if nextPageToken != "" {
+			call.PageToken(nextPageToken)
+		}
+		users, err := call.Do()
+		if err != nil {
+			return err
+		}
 
-	for _, user := range users.Users {
-		existingUserEmails = append(existingUserEmails, user.PrimaryEmail)
-		usersByEmail[user.PrimaryEmail] = user
+		for _, user := range users.Users {
+			existingUserEmails = append(existingUserEmails, user.PrimaryEmail)
+			usersByEmail[user.PrimaryEmail] = user
+		}
+		nextPageToken = users.NextPageToken
+		if users.NextPageToken == "" {
+			break
+		}
 	}
 
 	accounts, err := database.FetchAccounts()

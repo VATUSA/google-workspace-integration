@@ -177,13 +177,24 @@ func CreateFacilityGroups() error {
 	if err != nil {
 		return err
 	}
-	groups, err := svc.Groups.List().Customer(config.GOOGLE_CUSTOMER_ID).Do()
-	if err != nil {
-		return err
-	}
 	var existingGroups []string
-	for _, group := range groups.Groups {
-		existingGroups = append(existingGroups, group.Email)
+	nextPageToken := ""
+	for {
+		call := svc.Groups.List().Customer(config.GOOGLE_CUSTOMER_ID)
+		if nextPageToken != "" {
+			call = call.PageToken(nextPageToken)
+		}
+		groups, err := call.Do()
+		if err != nil {
+			return err
+		}
+		for _, group := range groups.Groups {
+			existingGroups = append(existingGroups, group.Email)
+		}
+		nextPageToken = groups.NextPageToken
+		if nextPageToken == "" {
+			break
+		}
 	}
 
 	for _, facility := range facilities {
