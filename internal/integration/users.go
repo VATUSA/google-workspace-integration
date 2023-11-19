@@ -81,7 +81,7 @@ func shouldControllerHaveAccount(data api.ControllerData) bool {
 	//if data.Rating == 8 || data.Rating == 10 {
 	//	return true
 	//}
-	allowedRoles := []string{"ATM", "DATM", "TA" /*"EC", "FE", "WM", "INS", "MTR",*/, "DICE", "USWT"}
+	allowedRoles := []string{"ATM", "DATM", "TA", "EC", "FE", "WM" /*"INS", "MTR",*/, "DICE", "USWT"}
 	for _, role := range data.Roles {
 		if slices.Contains(allowedRoles, role.Role) {
 			return true
