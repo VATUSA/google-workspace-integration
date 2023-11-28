@@ -26,6 +26,7 @@ func ProcessControllers(data []api.ControllerData) error {
 
 	accountsByCid := make(map[uint]database.Account)
 	var existingAliases []string
+	var checkedCids []uint
 
 	for _, account := range accounts {
 		accountsByCid[account.CID] = account
@@ -44,6 +45,21 @@ func ProcessControllers(data []api.ControllerData) error {
 			if err != nil {
 				return err
 			}
+		}
+		checkedCids = append(checkedCids, c.CID)
+	}
+
+	for cid, account := range accountsByCid {
+		if !slices.Contains(checkedCids, cid) {
+			data, err := api.GetControllerData(account.CID)
+			if err != nil {
+				return err
+			}
+			err = ProcessController(*data, &account, existingAliases)
+			if err != nil {
+				return err
+			}
+			checkedCids = append(checkedCids, cid)
 		}
 	}
 	return nil
