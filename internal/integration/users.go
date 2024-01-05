@@ -38,12 +38,12 @@ func ProcessControllers(data []api.ControllerData) error {
 		if ok {
 			err := ProcessController(c, &account, existingAliases)
 			if err != nil {
-				fmt.Printf("Error while processing controller: %d - %v", c.CID, err)
+				fmt.Printf("Error while processing controller: %d - %v\n", c.CID, err)
 			}
 		} else {
 			err := ProcessController(c, nil, existingAliases)
 			if err != nil {
-				fmt.Printf("Error while processing controller: %d - %v", c.CID, err)
+				fmt.Printf("Error while processing controller: %d - %v\n", c.CID, err)
 			}
 		}
 		checkedCids = append(checkedCids, c.CID)
@@ -57,7 +57,7 @@ func ProcessControllers(data []api.ControllerData) error {
 			}
 			err = ProcessController(*data, &account, existingAliases)
 			if err != nil {
-				fmt.Printf("Error while processing controller: %d - %v", data.CID, err)
+				fmt.Printf("Error while processing controller: %d - %v\n", data.CID, err)
 			}
 			checkedCids = append(checkedCids, cid)
 		}
