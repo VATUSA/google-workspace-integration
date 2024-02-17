@@ -3,7 +3,9 @@ package database
 func MigrateDB() error {
 	err := DB.AutoMigrate(
 		&Account{},
-		&Domain{},
+		&Alias{},
+		&Group{},
+		&GroupMembership{},
 	)
 	if err != nil {
 		return err

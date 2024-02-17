@@ -2,7 +2,8 @@ package main
 
 import (
 	"github.com/VATUSA/google-workspace-integration/internal/database"
-	"github.com/VATUSA/google-workspace-integration/internal/integration"
+	"github.com/VATUSA/google-workspace-integration/internal/workflow"
+	"log"
 	"time"
 )
 
@@ -18,27 +19,9 @@ func main() {
 	for {
 		println("Starting process loop")
 
-		err = integration.CreateFacilityGroups()
+		err = workflow.WorkflowMain()
 		if err != nil {
-			println(err.Error())
-			return
-		}
-
-		err = integration.DoProcessStaff()
-		if err != nil {
-			println(err.Error())
-			return
-		}
-
-		err = integration.SyncAccounts()
-		if err != nil {
-			println(err.Error())
-			return
-		}
-
-		err = integration.ProcessPasswordEmails()
-		if err != nil {
-			println(err.Error())
+			log.Printf("Error occurred in WorkflowMain: %v", err)
 			return
 		}
 

@@ -12,3 +12,5 @@ var MAIL_HOST = os.Getenv("MAIL_HOST")
 var MAIL_PORT = os.Getenv("MAIL_PORT")
 var MAIL_USERNAME = os.Getenv("MAIL_USERNAME")
 var MAIL_PASSWORD = os.Getenv("MAIL_PASSWORD")
+
+var DEBUG = os.Getenv("DEBUG") == "true"

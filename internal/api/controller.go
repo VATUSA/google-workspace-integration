@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/VATUSA/google-workspace-integration/internal/config"
 	"io/ioutil"
+	"slices"
 )
 
 type StaffListDataWrapper struct {
@@ -17,7 +18,7 @@ type ControllerDataWrapper struct {
 }
 
 type ControllerData struct {
-	CID                uint    `json:"cid"`
+	CID                uint64  `json:"cid"`
 	FirstName          string  `json:"fname"`
 	LastName           string  `json:"lname"`
 	Email              *string `json:"email"`
@@ -27,6 +28,54 @@ type ControllerData struct {
 	FlagHomeController bool    `json:"flag_homecontroller"`
 	Roles              []ControllerRoleData
 	VisitingFacilities []ControllerVisitingFacilityData `json:"visiting_facilities"`
+}
+
+func (c *ControllerData) HasRole(role string) bool {
+	if role == config.Instructor && (c.Rating == 8 || c.Rating == 10) {
+		return true
+	}
+	for _, roleData := range c.Roles {
+		if roleData.Role == role {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *ControllerData) HasAnyRole(roles []string) bool {
+	if slices.Contains(roles, config.Instructor) && (c.Rating == 8 || c.Rating == 10) {
+		return true
+	}
+	for _, roleData := range c.Roles {
+		if slices.Contains(roles, roleData.Role) {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *ControllerData) HasFacilityRole(role string, facility string) bool {
+	if role == config.Instructor && c.Facility == facility && (c.Rating == 8 || c.Rating == 10) {
+		return true
+	}
+	for _, roleData := range c.Roles {
+		if roleData.Role == role && roleData.Facility == facility {
+			return true
+		}
+	}
+	return false
+}
+
+func (c *ControllerData) HasAnyRoleAtFacility(roles []string, facility string) bool {
+	if slices.Contains(roles, config.Instructor) && c.Facility == facility && (c.Rating == 8 || c.Rating == 10) {
+		return true
+	}
+	for _, roleData := range c.Roles {
+		if roleData.Facility == facility && slices.Contains(roles, roleData.Role) {
+			return true
+		}
+	}
+	return false
 }
 
 type ControllerRoleData struct {
@@ -62,7 +111,7 @@ func GetControllerData(cid uint) (*ControllerData, error) {
 }
 
 func GetStaffMembers() ([]ControllerData, error) {
-	response, err := Get("/integration/staff")
+	response, err := Get(fmt.Sprintf("/integration/staff?apikey=%s", config.VATUSA_API2_KEY))
 	if err != nil {
 		return nil, err
 	}

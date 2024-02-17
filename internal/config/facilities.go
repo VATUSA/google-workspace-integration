@@ -1,0 +1,26 @@
+package config
+
+const (
+	Albuquerque  = "ZAB"
+	Anchorage    = "ZAN"
+	Atlanta      = "ZTL"
+	Boston       = "ZBW"
+	Chicago      = "ZAU"
+	Cleveland    = "ZOB"
+	Denver       = "ZDV"
+	FortWorth    = "ZFW"
+	Honolulu     = "HCF"
+	Houston      = "ZHU"
+	Indianapolis = "ZID"
+	Jacksonville = "ZJX"
+	KansasCity   = "ZKC"
+	LosAngeles   = "ZLA"
+	Memphis      = "ZME"
+	Miami        = "ZMA"
+	Minneapolis  = "ZMP"
+	NewYork      = "ZNY"
+	Oakland      = "ZOA"
+	SaltLake     = "ZLC"
+	Seattle      = "ZSE"
+	Washington   = "ZDC"
+)

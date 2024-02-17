@@ -7,8 +7,14 @@ import (
 )
 
 type FacilityData struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id                         string `json:"id"`
+	Name                       string `json:"name"`
+	AirTrafficManagerCID       uint64 `json:"atm"`
+	DeputyAirTrafficManagerCID uint64 `json:"datm"`
+	TrainingAdministratorCID   uint64 `json:"ta"`
+	EventCoordinatorCID        uint64 `json:"ec"`
+	FacilityEngineerCID        uint64 `json:"fe"`
+	WebMasterCID               uint64 `json:"wm"`
 }
 
 type FacilityListWrapper struct {
@@ -31,7 +37,7 @@ func GetFacilities() ([]FacilityData, error) {
 		return nil, err
 	}
 	var wrapper FacilityListWrapper
-	err = json.Unmarshal(responseData, wrapper)
+	err = json.Unmarshal(responseData, &wrapper)
 
 	if err != nil {
 		return nil, err

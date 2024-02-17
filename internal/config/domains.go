@@ -1,0 +1,26 @@
+package config
+
+var FacilityDomains = map[string][]string{
+	Albuquerque:  {},
+	Anchorage:    {},
+	Atlanta:      {},
+	Boston:       {},
+	Chicago:      {},
+	Cleveland:    {},
+	Denver:       {},
+	FortWorth:    {},
+	Honolulu:     {},
+	Houston:      {},
+	Indianapolis: {},
+	Jacksonville: {},
+	KansasCity:   {},
+	LosAngeles:   {},
+	Memphis:      {},
+	Miami:        {},
+	Minneapolis:  {},
+	NewYork:      {},
+	Oakland:      {},
+	SaltLake:     {},
+	Seattle:      {},
+	Washington:   {},
+}
