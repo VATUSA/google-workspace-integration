@@ -17,7 +17,7 @@ func main() {
 		return
 	}
 	for {
-		println("Starting process loop")
+		log.Print("Starting process loop")
 
 		err = workflow.WorkflowMain()
 		if err != nil {
@@ -25,7 +25,7 @@ func main() {
 			return
 		}
 
-		println("End of process loop -- Sleep")
+		log.Print("End of process loop -- Sleep")
 		time.Sleep(5 * time.Minute)
 	}
 }
