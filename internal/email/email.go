@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/VATUSA/google-workspace-integration/internal/config"
 	"gopkg.in/gomail.v2"
+	"log"
 	"strconv"
 )
 
@@ -25,7 +26,7 @@ func SendEmail(to string, subject string, body string) error {
 		return err
 	}
 
-	fmt.Printf("Email %s sent to %s\n", subject, to)
+	log.Printf("Email %s sent to %s\n", subject, to)
 	return nil
 }
 
