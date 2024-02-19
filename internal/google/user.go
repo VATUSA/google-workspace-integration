@@ -75,7 +75,7 @@ func SetUserSuspended(primaryEmail string, isSuspended bool) (err error) {
 }
 
 func DeleteUser(primaryEmail string) (err error) {
-	// TODO
+	// TODO: Implement DeleteUser
 	return
 }
 
