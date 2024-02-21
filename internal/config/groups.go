@@ -12,6 +12,7 @@ var RoleGroups = map[string]string{
 	Mentor:                  "mentor-all@vatusa.net",
 	DICETeam:                "dice@vatusa.net",
 	USWebTeam:               "techteam@vatusa.net",
+	SocialMediaTeam:         "social-media-team@vatusa.net",
 }
 
 // Facility Group Suffix
