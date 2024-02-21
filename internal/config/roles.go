@@ -12,6 +12,7 @@ const (
 	DICETeam                = "DICE"
 	USWebTeam               = "USWT"
 	GSuiteUser              = "GSUITE"
+	SocialMediaTeam         = "SMT"
 )
 
 // USA Staff roles
@@ -40,6 +41,7 @@ var AccountEntitlementRoles = []string{
 	DICETeam,
 	USWebTeam,
 	GSuiteUser,
+	SocialMediaTeam,
 	US1,
 	US2,
 	US3,
