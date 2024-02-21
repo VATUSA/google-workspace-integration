@@ -2,6 +2,7 @@ package google
 
 import (
 	"crypto/md5"
+	"errors"
 	"fmt"
 	"github.com/VATUSA/google-workspace-integration/internal/config"
 	"github.com/VATUSA/google-workspace-integration/internal/workspace_helper"
@@ -76,7 +77,7 @@ func SetUserSuspended(primaryEmail string, isSuspended bool) (err error) {
 
 func DeleteUser(primaryEmail string) (err error) {
 	// TODO: Implement DeleteUser
-	return
+	return errors.New("not implemented")
 }
 
 // TODO: Implement something to call this
