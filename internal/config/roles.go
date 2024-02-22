@@ -11,7 +11,7 @@ const (
 	Mentor                  = "MTR"
 	DICETeam                = "DICE"
 	USWebTeam               = "USWT"
-	GSuiteUser              = "GSUITE"
+	EmailUser               = "EMAIL"
 	SocialMediaTeam         = "SMT"
 )
 
@@ -40,7 +40,7 @@ var AccountEntitlementRoles = []string{
 	Mentor,
 	DICETeam,
 	USWebTeam,
-	GSuiteUser,
+	EmailUser,
 	SocialMediaTeam,
 	US1,
 	US2,
@@ -62,5 +62,5 @@ var FacilityNameAliasEntitlementRoles = []string{
 	WebMaster,
 	Instructor,
 	Mentor,
-	GSuiteUser,
+	EmailUser,
 }
