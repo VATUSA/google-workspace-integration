@@ -34,6 +34,10 @@ func createGroupCustomDomainAliases(groupsByEmail map[string]database.Group) {
 			existingAliases = append(existingAliases, alias.Email)
 		}
 		for _, domain := range config.FacilityDomains[group.Facility] {
+			if group.GroupType == "" {
+				// Don't try to create an alias for the general group
+				continue
+			}
 			aliasEmail := fmt.Sprintf("%s@%s", group.GroupType, domain)
 			if !slices.Contains(existingAliases, aliasEmail) {
 				groupAlias := database.GroupAlias{
