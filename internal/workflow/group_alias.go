@@ -20,13 +20,45 @@ func GroupAliasesMain() error {
 		groupsByEmail[group.PrimaryEmail] = group
 	}
 
-	createGroupAliases(groupsByEmail)
+	createGroupCustomDomainAliases(groupsByEmail)
+	createGroupExtraAliases(groupsByEmail)
 
 	log.Printf("End GroupAliasesMain")
 	return nil
 }
 
-func createGroupAliases(groupsByEmail map[string]database.Group) {
+func createGroupCustomDomainAliases(groupsByEmail map[string]database.Group) {
+	for _, group := range groupsByEmail {
+		var existingAliases []string
+		for _, alias := range group.Aliases {
+			existingAliases = append(existingAliases, alias.Email)
+		}
+		for _, domain := range config.FacilityDomains[group.Facility] {
+			aliasEmail := fmt.Sprintf("%s@%s", group.GroupType, domain)
+			if !slices.Contains(existingAliases, aliasEmail) {
+				groupAlias := database.GroupAlias{
+					Email:             aliasEmail,
+					GroupPrimaryEmail: group.PrimaryEmail,
+					Group:             &group,
+					Facility:          group.Facility,
+					Domain:            domain,
+				}
+				log.Printf("Creating group alias %s for group %s", group.PrimaryEmail, aliasEmail)
+				err := google.AddGroupAlias(group.PrimaryEmail, aliasEmail)
+				if err != nil {
+					log.Printf("Error creating group %s alias %s - %v", group.PrimaryEmail, aliasEmail, err)
+					continue
+				}
+				err = groupAlias.Save()
+				if err != nil {
+					log.Printf("Error saving groupAlias record %s - %v", aliasEmail, err)
+				}
+			}
+		}
+	}
+}
+
+func createGroupExtraAliases(groupsByEmail map[string]database.Group) {
 	for _, group := range groupsByEmail {
 		var existingAliases []string
 		for _, alias := range group.Aliases {

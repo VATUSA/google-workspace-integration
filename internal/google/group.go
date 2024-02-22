@@ -128,8 +128,8 @@ func AddGroupAlias(groupEmail string, aliasEmail string) (err error) {
 		Alias:        aliasEmail,
 		PrimaryEmail: groupEmail,
 	}
-	existingAlias, _ := GetGroupAlias(groupEmail, aliasEmail)
-	if existingAlias != nil {
+	existingAlias := GroupAliasExists(groupEmail, aliasEmail)
+	if !existingAlias {
 		// Don't try to create the alias if it already exists
 		// This ensures failure recovery and backwards compatibility with the existing group aliases
 		log.Printf("Prevented alias creation attempt for group: %s - alias: %s. "+
@@ -143,17 +143,16 @@ func AddGroupAlias(groupEmail string, aliasEmail string) (err error) {
 	return
 }
 
-func GetGroupAlias(groupEmail string, alias string) (existingAlias *admin.Alias, err error) {
+func GroupAliasExists(groupEmail string, alias string) bool {
 	svc, err := workspace_helper.GetService()
 	aliases, err := svc.Groups.Aliases.List(groupEmail).Do()
 	if err != nil {
-		return
+		return false
 	}
 	for _, a := range aliases.Aliases {
-		if a.(admin.Alias).Alias == alias {
-			tmp := a.(admin.Alias)
-			return &tmp, nil
+		if a.(map[string]interface{})["Alias"] == alias {
+			return true
 		}
 	}
-	return
+	return false
 }
