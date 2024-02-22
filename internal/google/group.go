@@ -135,6 +135,7 @@ func AddGroupAlias(groupEmail string, aliasEmail string) (err error) {
 		log.Printf("Prevented alias creation attempt for group: %s - alias: %s. "+
 			"This should only happen if the database is purged or if a user is manually created. ",
 			groupEmail, aliasEmail)
+		return
 	}
 	if config.DEBUG {
 		return
