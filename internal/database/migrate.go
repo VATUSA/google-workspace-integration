@@ -4,6 +4,7 @@ func MigrateDB() error {
 	err := DB.AutoMigrate(
 		&Account{},
 		&Alias{},
+		&GroupAlias{},
 		&Group{},
 		&GroupMembership{},
 	)

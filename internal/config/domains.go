@@ -8,7 +8,7 @@ var FacilityDomains = map[string][]string{
 	Chicago:      {},
 	Cleveland:    {},
 	Denver:       {},
-	FortWorth:    {},
+	FortWorth:    {"zfwartcc.net"},
 	Honolulu:     {},
 	Houston:      {},
 	Indianapolis: {},

@@ -5,6 +5,7 @@ type Group struct {
 	DisplayName  string
 	Facility     string
 	GroupType    string
+	Aliases      []GroupAlias
 }
 
 func FetchGroups() ([]Group, error) {

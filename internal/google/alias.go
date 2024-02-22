@@ -16,7 +16,7 @@ func AddUserAlias(userEmail string, alias string) (err error) {
 		Alias:        alias,
 		PrimaryEmail: userEmail,
 	}
-	existingAlias, _ := GetAlias(userEmail, alias)
+	existingAlias, _ := GetUserAlias(userEmail, alias)
 	if existingAlias != nil {
 		// Don't try to create the alias if it already exists
 		// This ensures failure recovery and backwards compatibility with the existing group memberships
@@ -44,7 +44,7 @@ func DeleteUserAlias(userEmail string, alias string) (err error) {
 	return
 }
 
-func GetAlias(userEmail string, alias string) (existingAlias *admin.Alias, err error) {
+func GetUserAlias(userEmail string, alias string) (existingAlias *admin.Alias, err error) {
 	svc, err := workspace_helper.GetService()
 	aliases, err := svc.Users.Aliases.List(userEmail).Do()
 	if err != nil {

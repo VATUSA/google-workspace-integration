@@ -12,8 +12,8 @@ type Alias struct {
 	AccountId uint64
 	Account   *Account
 	AliasType AliasType
-	Facility  string
-	Role      string
+	Facility  string `gorm:"size:12"`
+	Role      string `gorm:"size:12"`
 }
 
 func (a *Alias) Save() error {

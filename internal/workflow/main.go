@@ -12,6 +12,10 @@ func WorkflowMain() (err error) {
 	if err != nil {
 		return
 	}
+	err = GroupAliasesMain()
+	if err != nil {
+		return
+	}
 	err = GroupMembershipsMain()
 	if err != nil {
 		return

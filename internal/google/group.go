@@ -118,3 +118,42 @@ func CreateGroup(groupEmail string, displayName string) (err error) {
 	_, err = svc.Groups.Insert(group).Do()
 	return
 }
+
+func AddGroupAlias(groupEmail string, aliasEmail string) (err error) {
+	svc, err := workspace_helper.GetService()
+	if err != nil {
+		return
+	}
+	newAlias := &admin.Alias{
+		Alias:        aliasEmail,
+		PrimaryEmail: groupEmail,
+	}
+	existingAlias, _ := GetGroupAlias(groupEmail, aliasEmail)
+	if existingAlias != nil {
+		// Don't try to create the alias if it already exists
+		// This ensures failure recovery and backwards compatibility with the existing group aliases
+		log.Printf("Prevented alias creation attempt for group: %s - alias: %s. "+
+			"This should only happen if the database is purged or if a user is manually created. ",
+			groupEmail, aliasEmail)
+	}
+	if config.DEBUG {
+		return
+	}
+	_, err = svc.Groups.Aliases.Insert(groupEmail, newAlias).Do()
+	return
+}
+
+func GetGroupAlias(groupEmail string, alias string) (existingAlias *admin.Alias, err error) {
+	svc, err := workspace_helper.GetService()
+	aliases, err := svc.Groups.Aliases.List(groupEmail).Do()
+	if err != nil {
+		return
+	}
+	for _, a := range aliases.Aliases {
+		if a.(admin.Alias).Alias == alias {
+			tmp := a.(admin.Alias)
+			return &tmp, nil
+		}
+	}
+	return
+}

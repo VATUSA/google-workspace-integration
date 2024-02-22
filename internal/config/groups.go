@@ -27,6 +27,10 @@ const (
 	FacilityGroupTrainingStaff = "training"
 )
 
+var FacilityGroupCustomDomainAliases = map[string][]string{
+	FacilityGroupSeniorStaff: {"management"},
+}
+
 var FacilityGroupTypes = []string{
 	FacilityGroupGeneral,
 	FacilityGroupSeniorStaff,
