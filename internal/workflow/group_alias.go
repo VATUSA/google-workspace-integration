@@ -50,7 +50,7 @@ func createGroupCustomDomainAliases(groupsByEmail map[string]database.Group) {
 				log.Printf("Creating group alias %s for group %s", group.PrimaryEmail, aliasEmail)
 				err := google.AddGroupAlias(group.PrimaryEmail, aliasEmail)
 				if err != nil {
-					log.Printf("Error creating group %s alias %s - %v", group.PrimaryEmail, aliasEmail, err)
+					log.Printf("Error creating group alias %s for group %s - %v", aliasEmail, group.PrimaryEmail, err)
 					continue
 				}
 				err = groupAlias.Save()

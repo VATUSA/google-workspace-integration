@@ -48,27 +48,25 @@ func addPositionAliases(facilities []api.FacilityData, accountsByCID map[uint64]
 				}
 				for _, aliasEmail := range aliasEmails {
 					if !slices.Contains(existingAliases, aliasEmail) {
-						if !slices.Contains(existingAliases, aliasEmail) {
-							aliasRecord := database.Alias{
-								Email:     aliasEmail,
-								AccountId: account.Id,
-								Account:   &account,
-								AliasType: database.AliasType_FacilityPosition,
-								Facility:  facility.Id,
-								Role:      role,
-							}
-							log.Printf("Creating alias %s for user %s", aliasEmail, account.PrimaryEmail)
-							err := google.AddUserAlias(account.PrimaryEmail, aliasEmail)
-							if err != nil {
-								log.Printf("Error creating alias %s for user %s - %v",
-									aliasEmail, account.PrimaryEmail, err)
-								continue
-							}
-							err = aliasRecord.Save()
-							if err != nil {
-								log.Printf("Error saving alias %s record for user %s - %v",
-									aliasEmail, account.PrimaryEmail, err)
-							}
+						aliasRecord := database.Alias{
+							Email:     aliasEmail,
+							AccountId: account.Id,
+							Account:   &account,
+							AliasType: database.AliasType_FacilityPosition,
+							Facility:  facility.Id,
+							Role:      role,
+						}
+						log.Printf("Creating alias %s for user %s", aliasEmail, account.PrimaryEmail)
+						err := google.AddUserAlias(account.PrimaryEmail, aliasEmail)
+						if err != nil {
+							log.Printf("Error creating alias %s for user %s - %v",
+								aliasEmail, account.PrimaryEmail, err)
+							continue
+						}
+						err = aliasRecord.Save()
+						if err != nil {
+							log.Printf("Error saving alias %s record for user %s - %v",
+								aliasEmail, account.PrimaryEmail, err)
 						}
 					}
 				}
