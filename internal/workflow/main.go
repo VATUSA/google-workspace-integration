@@ -24,11 +24,10 @@ func WorkflowMain() (err error) {
 	if err != nil {
 		return
 	}
-	// Disable position aliases until launch
-	/*err = PositionAliasesMain()
+	err = PositionAliasesMain()
 	if err != nil {
 		return
-	}*/
+	}
 	log.Printf("End WorkflowMain")
 	return
 }
