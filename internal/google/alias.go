@@ -51,10 +51,8 @@ func UserAliasExists(userEmail string, alias string) bool {
 		return false
 	}
 	for _, a := range aliases.Aliases {
-		if a.(admin.Alias).Alias == alias {
-			if a.(map[string]interface{})["Alias"] == alias {
-				return true
-			}
+		if a.(map[string]interface{})["Alias"] == alias {
+			return true
 		}
 	}
 	return false
