@@ -83,7 +83,8 @@ func removePositionAliases(accounts []database.Account, facilitiesById map[strin
 			if alias.AliasType == database.AliasType_FacilityPosition {
 				facility, ok := facilitiesById[alias.Facility]
 				if ok {
-					if account.CID != facilityPositionHolder(facility, alias.Role) {
+					// Remove all caps aliases, they were added by mistake
+					if alias.Email != strings.ToLower(alias.Email) || account.CID != facilityPositionHolder(facility, alias.Role) {
 						log.Printf("Deleting alias %s for user %s", alias.Email, account.PrimaryEmail)
 						err := google.DeleteUserAlias(account.PrimaryEmail, alias.Email)
 						if err != nil {
