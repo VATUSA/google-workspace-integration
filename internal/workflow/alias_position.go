@@ -8,6 +8,7 @@ import (
 	"github.com/VATUSA/google-workspace-integration/internal/google"
 	"log"
 	"slices"
+	"strings"
 )
 
 func PositionAliasesMain() error {
@@ -120,10 +121,10 @@ func facilityPositionHolder(facility api.FacilityData, role string) uint64 {
 }
 
 func positionAliasEmails(facility string, position string) []string {
-	out := []string{fmt.Sprintf("%s-%s@vatusa.net", facility, position)}
+	out := []string{fmt.Sprintf("%s-%s@vatusa.net", strings.ToLower(facility), strings.ToLower(position))}
 	facilityDomains := config.FacilityDomains[facility]
 	for _, domain := range facilityDomains {
-		out = append(out, fmt.Sprintf("%s@%s", position, domain))
+		out = append(out, fmt.Sprintf("%s@%s", strings.ToLower(position), domain))
 	}
 	return out
 }
