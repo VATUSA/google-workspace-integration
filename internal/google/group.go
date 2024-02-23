@@ -129,7 +129,7 @@ func AddGroupAlias(groupEmail string, aliasEmail string) (err error) {
 		PrimaryEmail: groupEmail,
 	}
 	existingAlias := GroupAliasExists(groupEmail, aliasEmail)
-	if !existingAlias {
+	if existingAlias {
 		// Don't try to create the alias if it already exists
 		// This ensures failure recovery and backwards compatibility with the existing group aliases
 		log.Printf("Prevented alias creation attempt for group: %s - alias: %s. "+
