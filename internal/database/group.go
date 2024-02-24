@@ -10,7 +10,7 @@ type Group struct {
 
 func FetchGroups() ([]Group, error) {
 	var groups []Group
-	result := DB.Model(&Group{}).Find(&groups)
+	result := DB.Model(&Group{}).Preload("Aliases").Find(&groups)
 	if result.Error != nil {
 		return nil, result.Error
 	}
