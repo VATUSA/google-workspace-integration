@@ -16,7 +16,7 @@ var FacilityDomains = map[string][]string{
 	KansasCity:   {},
 	LosAngeles:   {},
 	Memphis:      {},
-	Miami:        {},
+	Miami:        {"zmaartcc.net"},
 	Minneapolis:  {},
 	NewYork:      {},
 	Oakland:      {},
