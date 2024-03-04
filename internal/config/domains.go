@@ -7,7 +7,7 @@ var FacilityDomains = map[string][]string{
 	Boston:       {},
 	Chicago:      {},
 	Cleveland:    {},
-	Denver:       {},
+	Denver:       {"zdvartcc.org"},
 	FortWorth:    {"zfwartcc.net"},
 	Honolulu:     {},
 	Houston:      {},
@@ -20,7 +20,7 @@ var FacilityDomains = map[string][]string{
 	Minneapolis:  {},
 	NewYork:      {},
 	Oakland:      {},
-	SaltLake:     {},
+	SaltLake:     {"zlcartcc.org"},
 	Seattle:      {},
 	Washington:   {},
 }
