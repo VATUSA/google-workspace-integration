@@ -60,6 +60,7 @@ func addNameAliases(accounts []database.Account, controllersByCID map[uint64]api
 								Facility:  facility,
 								Role:      "",
 							}
+							log.Printf("Creating alias %s for user %s", aliasEmail, account.PrimaryEmail)
 							err := google.AddUserAlias(account.PrimaryEmail, aliasEmail)
 							if err != nil {
 								log.Printf("Error creating alias %s for user %s - %v",
