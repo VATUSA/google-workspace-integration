@@ -1,5 +1,7 @@
 package config
 
+const FallbackAliasGroup = "alias-fallback@vatusa.net"
+
 // RoleGroups are assigned to everyone with the given role, regardless of facility
 var RoleGroups = map[string]string{
 	AirTrafficManager:       "atm-all@vatusa.net",

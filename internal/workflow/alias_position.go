@@ -29,6 +29,7 @@ func PositionAliasesMain() error {
 
 	// Remove needs to be first, otherwise add will fail on replacement
 	removePositionAliases(accounts, facilitiesById)
+	removeFallbackAliases(facilitiesById)
 	addPositionAliases(facilities, accountsByCID)
 
 	log.Printf("End PositionAliasesMain")
@@ -39,9 +40,15 @@ func addPositionAliases(facilities []api.FacilityData, accountsByCID map[uint64]
 	for _, facility := range facilities {
 		for _, role := range config.FacilityAliasRoles {
 			holderCID := facilityPositionHolderOrFallback(facility, role)
+			aliasEmails := positionAliasEmails(facility.Id, role)
+			if holderCID == 0 {
+				for _, aliasEmail := range aliasEmails {
+					addFallbackAlias(aliasEmail, facility.Id, role)
+				}
+				continue
+			}
 			account, ok := accountsByCID[holderCID]
 			if ok {
-				aliasEmails := positionAliasEmails(facility.Id, role)
 				var existingAliases []string
 				for _, existingAlias := range account.Aliases {
 					existingAliases = append(existingAliases, existingAlias.Email)
@@ -75,6 +82,24 @@ func addPositionAliases(facilities []api.FacilityData, accountsByCID map[uint64]
 	}
 }
 
+func addFallbackAlias(aliasEmail string, facilityId string, role string) {
+	fallbackAlias := database.FallbackAlias{
+		Email:    aliasEmail,
+		Facility: facilityId,
+		Role:     role,
+	}
+	log.Printf("Creating fallback alias %s", aliasEmail)
+	err := google.AddGroupAlias(config.FallbackAliasGroup, aliasEmail)
+	if err != nil {
+		log.Printf("Error creating fallback alias %s - %v", aliasEmail, err)
+		return
+	}
+	err = fallbackAlias.Save()
+	if err != nil {
+		log.Printf("Error saving FallbackAlias record %s - %v", aliasEmail, err)
+	}
+}
+
 func removePositionAliases(accounts []database.Account, facilitiesById map[string]api.FacilityData) {
 	for _, account := range accounts {
 		for _, alias := range account.Aliases {
@@ -96,6 +121,30 @@ func removePositionAliases(accounts []database.Account, facilitiesById map[strin
 								alias.Email, account.PrimaryEmail, err)
 						}
 					}
+				}
+			}
+		}
+	}
+}
+
+func removeFallbackAliases(facilitiesById map[string]api.FacilityData) {
+	aliases, err := database.FetchFallbackAliases()
+	if err != nil {
+		return
+	}
+	for _, alias := range aliases {
+		facility, ok := facilitiesById[alias.Facility]
+		if ok {
+			if facilityPositionHolder(facility, alias.Role) != 0 {
+				log.Printf("Deleting fallback alias %s", alias.Email)
+				err = google.RemoveGroupAlias(config.FallbackAliasGroup, alias.Email)
+				if err != nil {
+					log.Printf("Error when removing fallback alias %s - %v", alias.Email, err)
+					continue
+				}
+				err = alias.Delete()
+				if err != nil {
+					log.Printf("Error when deleting fallback alias %s - %v", alias.Email, err)
 				}
 			}
 		}
@@ -128,16 +177,8 @@ func facilityPositionHolderOrFallback(facility api.FacilityData, role string) ui
 		log.Printf("Staff POC %s missing for facility %s - fallback to ATM %d",
 			role, facility.Id, facility.AirTrafficManagerCID)
 		return facility.AirTrafficManagerCID
-	} else {
-		usa2, _ := api.GetUSA2()
-		if usa2 != nil {
-			log.Printf("Staff POC %s missing for facility %s - fallback to USA2 %d",
-				role, facility.Id, usa2.CID)
-			return usa2.CID
-		} else {
-			return 0
-		}
 	}
+	return 0
 }
 
 func positionAliasEmails(facility string, position string) []string {

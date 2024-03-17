@@ -144,6 +144,27 @@ func AddGroupAlias(groupEmail string, aliasEmail string) (err error) {
 	return
 }
 
+func RemoveGroupAlias(groupEmail string, aliasEmail string) (err error) {
+	svc, err := workspace_helper.GetService()
+	if err != nil {
+		return
+	}
+	existingAlias := GroupAliasExists(groupEmail, aliasEmail)
+	if !existingAlias {
+		// Don't try to create the alias if it already exists
+		// This ensures failure recovery and backwards compatibility with the existing group aliases
+		log.Printf("Prevented alias deletion attempt for group: %s - alias: %s. "+
+			"This should only happen if the database is purged or if an alias is manually deleted. ",
+			groupEmail, aliasEmail)
+		return
+	}
+	if config.DEBUG {
+		return
+	}
+	err = svc.Groups.Aliases.Delete(groupEmail, aliasEmail).Do()
+	return
+}
+
 func GroupAliasExists(groupEmail string, alias string) bool {
 	svc, err := workspace_helper.GetService()
 	aliases, err := svc.Groups.Aliases.List(groupEmail).Do()
