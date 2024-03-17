@@ -42,7 +42,7 @@ func GetFacilities() ([]FacilityData, error) {
 	if err != nil {
 		return nil, err
 	}
-	out := make([]FacilityData, len(wrapper.Data))
+	var out []FacilityData
 	for _, value := range wrapper.Data {
 		out = append(out, value)
 	}
