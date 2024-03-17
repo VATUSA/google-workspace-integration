@@ -132,3 +132,29 @@ func GetStaffMembers() ([]ControllerData, error) {
 	}
 	return wrapper.Data, nil
 }
+
+func GetUSA2() (*ControllerData, error) {
+	response, err := Get(fmt.Sprintf("/user/roles/ZHQ/US2?apikey=%s", config.VATUSA_API2_KEY))
+	if err != nil {
+		return nil, err
+	}
+	if response.StatusCode == 404 {
+		return nil, nil
+	}
+	if response.StatusCode != 200 {
+		return nil, errors.New("HTTP Error when fetching controller data")
+	}
+	responseData, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+	var wrapper StaffListDataWrapper
+	err = json.Unmarshal(responseData, &wrapper)
+	if err != nil {
+		return nil, err
+	}
+	if len(wrapper.Data) > 0 {
+		return &wrapper.Data[0], nil
+	}
+	return nil, nil
+}

@@ -38,7 +38,7 @@ func PositionAliasesMain() error {
 func addPositionAliases(facilities []api.FacilityData, accountsByCID map[uint64]database.Account) {
 	for _, facility := range facilities {
 		for _, role := range config.FacilityAliasRoles {
-			holderCID := facilityPositionHolder(facility, role)
+			holderCID := facilityPositionHolderOrFallback(facility, role)
 			account, ok := accountsByCID[holderCID]
 			if ok {
 				aliasEmails := positionAliasEmails(facility.Id, role)
@@ -82,7 +82,7 @@ func removePositionAliases(accounts []database.Account, facilitiesById map[strin
 				facility, ok := facilitiesById[alias.Facility]
 				if ok {
 					// Remove all caps aliases, they were added by mistake
-					if alias.Email != strings.ToLower(alias.Email) || account.CID != facilityPositionHolder(facility, alias.Role) {
+					if alias.Email != strings.ToLower(alias.Email) || account.CID != facilityPositionHolderOrFallback(facility, alias.Role) {
 						log.Printf("Deleting alias %s for user %s", alias.Email, account.PrimaryEmail)
 						err := google.DeleteUserAlias(account.PrimaryEmail, alias.Email)
 						if err != nil {
@@ -117,6 +117,23 @@ func facilityPositionHolder(facility api.FacilityData, role string) uint64 {
 		return facility.WebMasterCID
 	}
 	return 0
+}
+
+func facilityPositionHolderOrFallback(facility api.FacilityData, role string) uint64 {
+	baseHolder := facilityPositionHolder(facility, role)
+	if baseHolder != 0 {
+		return baseHolder
+	}
+	if role != config.AirTrafficManager && facility.AirTrafficManagerCID != 0 {
+		return facility.AirTrafficManagerCID
+	} else {
+		usa2, _ := api.GetUSA2()
+		if usa2 != nil {
+			return usa2.CID
+		} else {
+			return 0
+		}
+	}
 }
 
 func positionAliasEmails(facility string, position string) []string {
