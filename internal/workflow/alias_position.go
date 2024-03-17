@@ -125,10 +125,14 @@ func facilityPositionHolderOrFallback(facility api.FacilityData, role string) ui
 		return baseHolder
 	}
 	if role != config.AirTrafficManager && facility.AirTrafficManagerCID != 0 {
+		log.Printf("Staff POC %s missing for facility %s - fallback to ATM %d",
+			role, facility.Id, facility.AirTrafficManagerCID)
 		return facility.AirTrafficManagerCID
 	} else {
 		usa2, _ := api.GetUSA2()
 		if usa2 != nil {
+			log.Printf("Staff POC %s missing for facility %s - fallback to USA2 %d",
+				role, facility.Id, usa2.CID)
 			return usa2.CID
 		} else {
 			return 0
