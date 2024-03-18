@@ -22,5 +22,5 @@ var FacilityDomains = map[string][]string{
 	Oakland:      {},
 	SaltLake:     {"zlcartcc.org"},
 	Seattle:      {},
-	Washington:   {},
+	Washington:   {"vzdc.org"},
 }
