@@ -26,24 +26,33 @@ func PositionAliasesMain() error {
 	for _, account := range accounts {
 		accountsByCID[account.CID] = account
 	}
+	fallbackAliases, err := database.FetchFallbackAliases()
+	if err != nil {
+		return err
+	}
+	var fallbackAliasesByEmail = make(map[string]database.FallbackAlias)
+	for _, alias := range fallbackAliases {
+		fallbackAliasesByEmail[alias.Email] = alias
+	}
 
 	// Remove needs to be first, otherwise add will fail on replacement
 	removePositionAliases(accounts, facilitiesById)
 	removeFallbackAliases(facilitiesById)
-	addPositionAliases(facilities, accountsByCID)
+	addPositionAliases(facilities, accountsByCID, fallbackAliasesByEmail)
 
 	log.Printf("End PositionAliasesMain")
 	return nil
 }
 
-func addPositionAliases(facilities []api.FacilityData, accountsByCID map[uint64]database.Account) {
+func addPositionAliases(facilities []api.FacilityData, accountsByCID map[uint64]database.Account,
+	fallbackAliasesByEmail map[string]database.FallbackAlias) {
 	for _, facility := range facilities {
 		for _, role := range config.FacilityAliasRoles {
 			holderCID := facilityPositionHolderOrFallback(facility, role)
 			aliasEmails := positionAliasEmails(facility.Id, role)
 			if holderCID == 0 {
 				for _, aliasEmail := range aliasEmails {
-					addFallbackAlias(aliasEmail, facility.Id, role)
+					addFallbackAlias(aliasEmail, facility.Id, role, fallbackAliasesByEmail)
 				}
 				continue
 			}
@@ -82,7 +91,12 @@ func addPositionAliases(facilities []api.FacilityData, accountsByCID map[uint64]
 	}
 }
 
-func addFallbackAlias(aliasEmail string, facilityId string, role string) {
+func addFallbackAlias(aliasEmail string, facilityId string, role string,
+	fallbackAliasesByEmail map[string]database.FallbackAlias) {
+	_, existingAlias := fallbackAliasesByEmail[aliasEmail]
+	if existingAlias {
+		return
+	}
 	fallbackAlias := database.FallbackAlias{
 		Email:    aliasEmail,
 		Facility: facilityId,
