@@ -88,7 +88,7 @@ func removeNameAliases(accounts []database.Account, controllersByCID map[uint64]
 			for _, alias := range account.Aliases {
 				if alias.AliasType == database.AliasType_FacilityName &&
 					!shouldHaveFacilityNameAlias(controller, alias.Facility) {
-					err := google.DeleteUserAlias(account.PrimaryAlias, alias.Email)
+					err := google.DeleteUserAlias(account.PrimaryEmail, alias.Email)
 					if err != nil {
 						log.Printf("Error removing alias %s for user %s - %v",
 							alias.Email, account.PrimaryEmail, err)
