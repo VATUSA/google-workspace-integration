@@ -10,7 +10,7 @@ var FacilityDomains = map[string][]string{
 	Denver:       {"zdvartcc.org"},
 	FortWorth:    {"zfwartcc.net"},
 	Honolulu:     {},
-	Houston:      {},
+	Houston:      {"houston.center"},
 	Indianapolis: {},
 	Jacksonville: {},
 	KansasCity:   {},
