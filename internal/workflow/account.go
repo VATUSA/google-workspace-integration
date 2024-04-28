@@ -160,6 +160,27 @@ func suspendAccounts(accounts []database.Account, controllersByCID map[uint64]ap
 					log.Printf("Error saving account object for CID: %d - %v", account.CID, err)
 				}
 			}
+		} else {
+			controller, err := api.GetControllerData(uint(account.CID))
+			if err != nil {
+				log.Printf("Error getting controller data for CID: %d - %v", account.CID, err)
+				return
+			}
+			shouldHaveAccount := shouldControllerHaveAccount(*controller)
+			if !account.IsSuspended && !shouldHaveAccount {
+				now := time.Now()
+				account.IsSuspended = true
+				account.SuspendedAt = &now
+				err := google.SetUserSuspended(account.PrimaryEmail, true)
+				if err != nil {
+					log.Printf("Error setting user suspended - CID: %d - %v", account.CID, err)
+					continue
+				}
+				err = account.Save()
+				if err != nil {
+					log.Printf("Error saving account object for CID: %d - %v", account.CID, err)
+				}
+			}
 		}
 	}
 }
