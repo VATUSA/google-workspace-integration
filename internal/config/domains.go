@@ -19,7 +19,7 @@ var FacilityDomains = map[string][]string{
 	Miami:        {"zmaartcc.net"},
 	Minneapolis:  {},
 	NewYork:      {},
-	Oakland:      {},
+	Oakland:      {"oakartcc.org"},
 	SaltLake:     {"zlcartcc.org"},
 	Seattle:      {},
 	Washington:   {"vzdc.org"},
