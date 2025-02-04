@@ -190,7 +190,7 @@ const AccountDeleteDelay = 7 * 24 * time.Hour
 func deleteAccounts(accounts []database.Account) {
 	for _, account := range accounts {
 		if account.IsSuspended {
-			if account.SuspendedAt.Add(AccountDeleteDelay).Before(time.Now()) {
+			if account.SuspendedAt != nil && account.SuspendedAt.Add(AccountDeleteDelay).Before(time.Now()) {
 				err := google.DeleteUser(account.PrimaryEmail)
 				if err != nil {
 					log.Printf("Error deleting user - CID: %d - %v", account.CID, err)
