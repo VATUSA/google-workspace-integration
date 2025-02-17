@@ -12,7 +12,7 @@ var FacilityDomains = map[string][]string{
 	Honolulu:     {},
 	Houston:      {"houston.center"},
 	Indianapolis: {},
-	Jacksonville: {},
+	Jacksonville: {"zjxartcc.org"},
 	KansasCity:   {"zkcartcc.org"},
 	LosAngeles:   {},
 	Memphis:      {},
