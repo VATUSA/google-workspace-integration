@@ -11,7 +11,7 @@ var FacilityDomains = map[string][]string{
 	FortWorth:    {"zfwartcc.net"},
 	Honolulu:     {},
 	Houston:      {"houston.center"},
-	Indianapolis: {},
+	Indianapolis: {"flyindycenter.com"},
 	Jacksonville: {"zjxartcc.org"},
 	KansasCity:   {"zkcartcc.org"},
 	LosAngeles:   {},
