@@ -2,14 +2,14 @@ package google
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
-	"github.com/VATUSA/google-workspace-integration/internal/config"
-	"github.com/VATUSA/google-workspace-integration/internal/workspace_helper"
-	admin "google.golang.org/api/admin/directory/v1"
 	"log"
 	"math/rand"
 	"strings"
+
+	"github.com/VATUSA/google-workspace-integration/internal/config"
+	"github.com/VATUSA/google-workspace-integration/internal/workspace_helper"
+	admin "google.golang.org/api/admin/directory/v1"
 )
 
 func CreateUser(firstName string, lastName string, primaryEmail string) (password string, err error) {
@@ -58,6 +58,18 @@ func CreateUser(firstName string, lastName string, primaryEmail string) (passwor
 	return
 }
 
+func CheckUserExists(primaryEmail string) (exists bool, err error) {
+	svc, err := workspace_helper.GetService()
+	if err != nil {
+		return
+	}
+	_, err = svc.Users.Get(primaryEmail).Do()
+	if err != nil {
+		return false, nil
+	}
+	return true, nil
+}
+
 func SetUserSuspended(primaryEmail string, isSuspended bool) (err error) {
 	svc, err := workspace_helper.GetService()
 	if err != nil {
@@ -76,8 +88,16 @@ func SetUserSuspended(primaryEmail string, isSuspended bool) (err error) {
 }
 
 func DeleteUser(primaryEmail string) (err error) {
-	// TODO: Implement DeleteUser
-	return errors.New("not implemented")
+	svc, err := workspace_helper.GetService()
+	if err != nil {
+		return
+	}
+	user, err := svc.Users.Get(primaryEmail).Do()
+	if err != nil {
+		return nil
+	}
+	svc.Users.Delete(user.PrimaryEmail)
+	return nil
 }
 
 // TODO: Implement something to call this

@@ -3,16 +3,17 @@ package workflow
 import (
 	"errors"
 	"fmt"
-	"github.com/VATUSA/google-workspace-integration/internal/api"
-	"github.com/VATUSA/google-workspace-integration/internal/config"
-	"github.com/VATUSA/google-workspace-integration/internal/database"
-	"github.com/VATUSA/google-workspace-integration/internal/email"
-	"github.com/VATUSA/google-workspace-integration/internal/google"
 	"log"
 	"regexp"
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/VATUSA/google-workspace-integration/internal/api"
+	"github.com/VATUSA/google-workspace-integration/internal/config"
+	"github.com/VATUSA/google-workspace-integration/internal/database"
+	"github.com/VATUSA/google-workspace-integration/internal/email"
+	"github.com/VATUSA/google-workspace-integration/internal/google"
 )
 
 func AccountsMain() error {
@@ -130,6 +131,9 @@ func updateAccounts(
 
 func suspendAccounts(accounts []database.Account, controllersByCID map[uint64]api.ControllerData) {
 	for _, account := range accounts {
+		if !account.IsManaged {
+			continue
+		}
 		controller, ok := controllersByCID[account.CID]
 		if ok {
 			shouldHaveAccount := shouldControllerHaveAccount(controller)
