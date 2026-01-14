@@ -203,6 +203,9 @@ func deleteAccounts(accounts []database.Account) {
 				for _, group := range account.GroupMemberships {
 					group.Delete()
 				}
+				for _, alias := range account.Aliases {
+					alias.Delete()
+				}
 				err = account.Delete()
 				if err != nil {
 					log.Printf("Error deleting account object for CID: %d - %v", account.CID, err)
