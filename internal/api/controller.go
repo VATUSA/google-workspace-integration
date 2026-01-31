@@ -119,7 +119,7 @@ func GetStaffMembers() ([]ControllerData, error) {
 		return nil, nil
 	}
 	if response.StatusCode != 200 {
-		return nil, errors.New("HTTP Error when fetching controller data")
+		return nil, fmt.Errorf("HTTP Error '%d' when fetching staff members", response.StatusCode)
 	}
 	responseData, err := ioutil.ReadAll(response.Body)
 	if err != nil {
