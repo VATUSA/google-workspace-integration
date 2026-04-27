@@ -143,8 +143,14 @@ func suspendAccounts(accounts []database.Account, controllersByCID map[uint64]ap
 				account.SuspendedAt = &now
 				err := google.SetUserSuspended(account.PrimaryEmail, true)
 				if err != nil {
-					log.Printf("Error setting user suspended - CID: %d - %v", account.CID, err)
-					continue
+					accountExists, err2 := google.CheckUserExists(account.PrimaryEmail)
+					if err2 != nil {
+						log.Printf("Error checking if account exists: %d - %v", account.CID, err2)
+					}
+					if err2 == nil && accountExists {
+						log.Printf("Error setting user suspended - CID: %d - %v", account.CID, err)
+						continue
+					}
 				}
 				err = account.Save()
 				if err != nil {
@@ -177,8 +183,14 @@ func suspendAccounts(accounts []database.Account, controllersByCID map[uint64]ap
 				account.SuspendedAt = &now
 				err := google.SetUserSuspended(account.PrimaryEmail, true)
 				if err != nil {
-					log.Printf("Error setting user suspended - CID: %d - %v", account.CID, err)
-					continue
+					accountExists, err2 := google.CheckUserExists(account.PrimaryEmail)
+					if err2 != nil {
+						log.Printf("Error checking if account exists: %d - %v", account.CID, err2)
+					}
+					if err2 == nil && accountExists {
+						log.Printf("Error setting user suspended - CID: %d - %v", account.CID, err)
+						continue
+					}
 				}
 				err = account.Save()
 				if err != nil {
@@ -197,8 +209,14 @@ func deleteAccounts(accounts []database.Account) {
 			if account.SuspendedAt != nil && account.SuspendedAt.Add(AccountDeleteDelay).Before(time.Now()) {
 				err := google.DeleteUser(account.PrimaryEmail)
 				if err != nil {
-					log.Printf("Error deleting user - CID: %d - %v", account.CID, err)
-					continue
+					accountExists, err2 := google.CheckUserExists(account.PrimaryEmail)
+					if err2 != nil {
+						log.Printf("Error checking if account exists: %d - %v", account.CID, err2)
+					}
+					if err2 == nil && accountExists {
+						log.Printf("Error deleting user - CID: %d - %v", account.CID, err)
+						continue
+					}
 				}
 				for _, group := range account.GroupMemberships {
 					group.Delete()
