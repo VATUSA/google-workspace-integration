@@ -46,6 +46,11 @@ jobs:
           file: ./Dockerfile
           push: true
           target: app
+          # Built for ARM as well as x86 so the image can run on ARM cluster nodes.
+          # No QEMU step is needed: the Dockerfile pins the build stage to
+          # $BUILDPLATFORM and cross-compiles with GOARCH, so both variants are
+          # produced natively.
+          platforms: linux/amd64,linux/arm64
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
