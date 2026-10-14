@@ -9,6 +9,11 @@ type DatabaseConfig struct {
 	User     string
 	Password string
 	Database string
+	// TLS is passed to the driver's tls= DSN option when set. "true" encrypts and
+	// verifies the server certificate against the system roots, which is what Azure
+	// Database for MySQL needs (require_secure_transport=ON). Leave unset for
+	// DigitalOcean, whose CA isn't in the system roots.
+	TLS string
 }
 
 var PrimaryDatabaseConfig = DatabaseConfig{
@@ -17,4 +22,5 @@ var PrimaryDatabaseConfig = DatabaseConfig{
 	User:     os.Getenv("DB_PRIMARY_USER"),
 	Password: os.Getenv("DB_PRIMARY_PASSWORD"),
 	Database: os.Getenv("DB_PRIMARY_DATABASE"),
+	TLS:      os.Getenv("DB_TLS"),
 }

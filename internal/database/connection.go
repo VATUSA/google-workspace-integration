@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm/logger"
 	"log"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -17,6 +18,9 @@ var DB *gorm.DB
 
 func DSN(c *DatabaseConfig) (string, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", c.User, c.Password, c.Host, c.Port, c.Database)
+	if c.TLS != "" {
+		dsn += "&tls=" + c.TLS
+	}
 	return dsn, nil
 }
 
@@ -46,10 +50,16 @@ func Connect() error {
 		return err
 	}
 	mysqlDB, err := DB.DB()
-	mysqlDB.SetMaxIdleConns(10)
-	mysqlDB.SetMaxOpenConns(100)
 	if err != nil {
 		return err
 	}
+	// The MySQL server is shared by the whole stack (max_connections 200 on Azure),
+	// and this service needs only a handful. DB_MAX_OPEN_CONNS overrides the default.
+	maxOpen := 5
+	if v, err := strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONNS")); err == nil && v > 0 {
+		maxOpen = v
+	}
+	mysqlDB.SetMaxOpenConns(maxOpen)
+	mysqlDB.SetMaxIdleConns(maxOpen)
 	return nil
 }
